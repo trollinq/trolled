@@ -706,7 +706,7 @@ function library:init()
 		hasinitt = true
 		--		self.cheatname = "nomercy.sucks"
 	end
-	
+
 	local tooltipObjects = {};
 
 	makefolder(self.cheatname)
@@ -4822,6 +4822,7 @@ function library:init()
         library:SendNotification('octohook | DISCORD WAS TERMED. AUTO JOINED.')
     end]]
 end
+library.unloadSignal = library.signal.new()
 
 function library:CreateSettingsTab(menu)
 	local flags = library.flags;
@@ -4877,9 +4878,17 @@ function library:CreateSettingsTab(menu)
 			configuration_section:AddBox({text = "Config Name", flag = "configinput"})
 			configuration_section:AddList({text = "Config", flag = "selected_config"})
 			configuration_section:AddButton({text = "Load", confirm = true, callback = function()
+				if flags.selected_config then
+					library:LoadConfig(flags.configinput);
+					return
+				end
 				library:LoadConfig(flags.selected_config);
 			end});
 			configuration_section:AddButton({text = "Save", confirm = true, callback = function()
+				if flags.selected_config then
+					library:SaveConfig(flags.configinput);
+					return
+				end
 				library:SaveConfig(flags.selected_config);
 			end});
 			configuration_section:AddButton({text = "Create", confirm = true, callback = function()
@@ -4933,31 +4942,36 @@ function library:CreateSettingsTab(menu)
 			main_section:AddBind({text = "Open / Close", flag = "togglebind", nomouse = true, noindicator = true, bind = Enum.KeyCode.End, callback = function()
 				library:SetOpen(not library.open)
 			end});
-			main_section:AddButton({text = "Join Discord",  callback = function()
-				local res = syn.request({
-					Url = "http://127.0.0.1:6463/rpc?v=1",
-					Method = "POST",
-					Headers = {
-						["Content-Type"] = "application/json",
-						Origin = "https://discord.com"
-					},
-					Body = game:GetService("HttpService"):JSONEncode({
-						cmd = "INVITE_BROWSER",
-						nonce = game:GetService("HttpService"):GenerateGUID(false),
-						args = {code = getgenv().discordInvite or "octohook"};
+			if getgenv().discordInvite then
+				main_section:AddButton({text = "Join Discord",  callback = function()
+					local res = syn.request({
+						Url = "http://127.0.0.1:6463/rpc?v=1",
+						Method = "POST",
+						Headers = {
+							["Content-Type"] = "application/json",
+							Origin = "https://discord.com"
+						},
+						Body = game:GetService("HttpService"):JSONEncode({
+							cmd = "INVITE_BROWSER",
+							nonce = game:GetService("HttpService"):GenerateGUID(false),
+							args = {code = getgenv().discordInvite};
+						});
 					});
-				});
-				if res.Success then
-					library:SendNotification("DISCORD PROMPT | Sent Invite Prompt" , 3);
-				end;
-			end});
+					if res.Success then
+						library:SendNotification("DISCORD PROMPT | Sent Invite Prompt" , 3);
+					end;
+				end});
+			end
 			main_section:AddButton({text = "Copy Server Connect Script", callback = function()
 				setclipboard(([[game:GetService("TeleportService"):TeleportToPlaceInstance(%s, "%s")]]):format(game.PlaceId, game.JobId));
 			end});
 			main_section:AddButton({text = "Rejoin Game", confirm = true, callback = function()
 				game:GetService("TeleportService"):Teleport(game.PlaceId);
 			end})
-
+			main_section:AddButton({text = "Unload",  callback = function()
+				pcall(library.Unload,library)
+				pcall(function()library.unloadSignal:Fire()end)
+			end});
 			main_section:AddBox({text = "Cheat Name", flag = "cheat_name", input = library.cheatname, callback = function(txt)
 				library.change_name(txt, flags.cheat_domain);
 			end});
