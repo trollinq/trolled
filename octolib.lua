@@ -2083,6 +2083,7 @@ function library:init()
 				callback = function() end;
 				objects = {};
 				sections = {};
+                openSignal = library.signal.new()
 			}
 
 			table.insert(self.tabs, tab);
@@ -4598,6 +4599,7 @@ function library:init()
 			end
 
 			function tab:Select()
+                tab.openSignal:Fire()
 				window.selectedTab = tab;
 				window:UpdateTabs();
 				for i,v in next, window.tabs do
