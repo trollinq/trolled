@@ -4898,7 +4898,11 @@ function library:CreateSettingsTab(menu)
 					library:SendNotification("Config \""..flags.configinput.."\" already exists.", 5, c3new(1,0,0));
 					return
 				end
-				writefile(library.cheatname.."/"..library.gamename.."/configs/"..flags.configinput.. library.fileext, http:JSONEncode(getgenv().configLolHOWHOWHOW or {}));
+				if getgenv().balgfdgfdsler then
+					library:SaveConfig(flags.configinput)
+				else
+					writefile(library.cheatname.."/"..library.gamename.."/configs/"..flags.configinput.. library.fileext, http:JSONEncode(getgenv().configLolHOWHOWHOW or {}));
+				end
 				refresh_configs();
 			end})
 			configuration_section:AddButton({text = "Delete", confirm = true, callback = function()
