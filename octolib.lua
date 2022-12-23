@@ -5,10 +5,10 @@ local startupArgs = ({...})[1] or {}
 local replaceEnv;
 if getgenv().library ~= nil then
 	if getgenv().library.domain and getgenv().library.themes then -- check if the library has the same features (woah crazy)
-		replaceEnv = true
-	else
 		replaceEnv = false
 		getgenv().library:Unload();
+	else
+		replaceEnv = true
 	end
 end
 
