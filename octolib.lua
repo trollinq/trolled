@@ -2,8 +2,14 @@
 
 local startupArgs = ({...})[1] or {}
 
+local replaceEnv;
 if getgenv().library ~= nil then
-	getgenv().library:Unload();
+	if getgenv().library.domain and getgenv().library.themes then -- check if the library has the same features (woah crazy)
+		replaceEnv = true
+	else
+		replaceEnv = false
+		getgenv().library:Unload();
+	end
 end
 
 if not game:IsLoaded() then
@@ -4990,5 +4996,10 @@ function library:CreateSettingsTab(menu)
 	return settings
 end
 
-getgenv().library = library
+if replaceEnv then
+	getgenv().octoLibrary = library
+else
+	getgenv().library = library
+end
+
 return library;
